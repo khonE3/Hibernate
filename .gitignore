@@ -1,0 +1,26 @@
+# Maven build output
+target/
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Eclipse / IDE metadata
+.settings/
+.project
+.classpath
+.factorypath
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Hibernate / Temp
+*.log
+derivative.txt

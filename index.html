@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="คู่มือสรุปคำสั่ง Hibernate ORM ทั้งหมดพร้อมตัวอย่างโค้ด Java">
+    <title>Hibernate ORM — Complete Command Reference</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐻</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET & VARIABLES ========== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+    --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a2e;
+    --card:rgba(22,22,35,.7);--glass:rgba(255,255,255,.03);
+    --t1:#e8e8f0;--t2:#a0a0b8;--t3:#6e6e8a;
+    --ac:#7c6aef;--ac2:#5b4bc4;--acg:rgba(124,106,239,.15);
+    --gr:linear-gradient(135deg,#7c6aef,#5b8def,#4ecdc4);
+    --green:#4ecdc4;--orange:#f7a046;--red:#ef6b6b;--blue:#5b8def;
+    --border:rgba(255,255,255,.06);--border2:rgba(124,106,239,.3);
+    --r:12px;--font:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--ac2) var(--bg2)}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);line-height:1.6;overflow-x:hidden;overflow-wrap:break-word;word-wrap:break-word;width:100%;max-width:100vw;min-height:100vh}
+
+/* ========== BACKGROUND ========== */
+.bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:float 20s ease-in-out infinite}
+.orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(124,106,239,.12),transparent);top:-10%;left:-5%}
+.orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(78,205,196,.12),transparent);top:40%;right:-8%;animation-delay:-7s}
+.orb-3{width:350px;height:350px;background:radial-gradient(circle,rgba(91,141,239,.12),transparent);bottom:-5%;left:30%;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-40px) scale(1.05)}50%{transform:translate(-20px,30px) scale(.95)}75%{transform:translate(40px,20px) scale(1.03)}}
+
+/* ========== LAYOUT ========== */
+.wrap{position:relative;display:flex;min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden}
+
+/* ========== SIDEBAR ========== */
+.side{position:fixed;top:0;left:0;width:270px;height:100vh;background:rgba(12,12,20,.96);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .3s ease}
+.side-hd{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.side-icon{width:38px;height:38px;background:var(--gr);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff}
+.side-title{font-size:16px;font-weight:700;color:var(--t1)}
+.side-sub{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+.side-search{padding:12px 16px;border-bottom:1px solid var(--border)}
+.side-search input{width:100%;padding:8px 12px 8px 34px;background:var(--glass);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-family:var(--font);font-size:13px;outline:0;transition:.2s}
+.side-search input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(124,106,239,.15)}
+.s-wrap{position:relative}
+.s-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.5}
+.side-nav{flex:1;overflow-y:auto;padding:8px 0;scrollbar-width:thin;scrollbar-color:var(--ac2) transparent}
+.nav-g{margin-bottom:4px}
+.nav-gt{padding:8px 16px 4px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)}
+.nav-a{display:flex;align-items:center;gap:8px;padding:7px 16px;color:var(--t2);text-decoration:none;font-size:12.5px;font-weight:500;transition:.2s;border-left:3px solid transparent;cursor:pointer}
+.nav-a:hover{color:var(--t1);background:rgba(255,255,255,.04);border-left-color:rgba(124,106,239,.3)}
+.nav-a.active{color:var(--ac);background:rgba(124,106,239,.08);border-left-color:var(--ac)}
+.nav-i{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.nav-b{margin-left:auto;background:rgba(124,106,239,.15);color:var(--ac);font-size:9px;font-weight:600;padding:2px 6px;border-radius:8px}
+.side-ft{padding:12px 16px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);text-align:center}
+.side-ft a{color:var(--ac);text-decoration:none}
+
+/* ========== HAMBURGER ========== */
+.ham{display:none;position:fixed;top:12px;left:12px;z-index:200;width:40px;height:40px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:18px;cursor:pointer;align-items:center;justify-content:center}
+.overlay{display:none;position:fixed;inset:0;background:transparent;z-index:90}
+
+/* ========== MAIN ========== */
+.main{margin-left:270px;flex:1;min-height:100vh;width:calc(100% - 270px);max-width:100%}
+.hero{padding:50px 40px 36px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,106,239,.04),transparent 50%,rgba(78,205,196,.03));pointer-events:none}
+.hero-c{position:relative;z-index:1;max-width:860px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(124,106,239,.12);color:var(--ac);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:16px;border:1px solid rgba(124,106,239,.15)}
+.hero h1{font-size:36px;font-weight:800;line-height:1.15;margin-bottom:12px;background:var(--gr);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:15px;color:var(--t2);max-width:680px;line-height:1.7}
+.stats{display:flex;gap:16px;margin-top:22px;flex-wrap:wrap}
+.stat{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r)}
+.stat b{font-size:20px;font-weight:800;color:var(--ac)}
+.stat span{font-size:11px;color:var(--t3);font-weight:500}
+
+/* ========== CONTENT ========== */
+.content{padding:32px 40px 60px;max-width:1060px}
+.sec{margin-bottom:48px;scroll-margin-top:24px}
+.sec-hd{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sec-ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sec-ic.pur{background:rgba(124,106,239,.12)}.sec-ic.grn{background:rgba(78,205,196,.12)}.sec-ic.blu{background:rgba(91,141,239,.12)}.sec-ic.org{background:rgba(247,160,70,.12)}.sec-ic.red{background:rgba(239,107,107,.12)}.sec-ic.ylw{background:rgba(240,219,79,.1)}.sec-ic.pnk{background:rgba(239,107,175,.12)}
+.sec-t{font-size:22px;font-weight:700;color:var(--t1)}
+.sec-d{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.7}
+.sec-d code{font-family:var(--mono);font-size:12px;background:rgba(124,106,239,.1);color:var(--ac);padding:2px 5px;border-radius:4px}
+
+/* ========== CARD ========== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:.3s}
+.card:hover{border-color:var(--border2);box-shadow:0 0 30px var(--acg)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none;transition:.15s;gap:8px}
+.card-hd:hover{background:rgba(255,255,255,.04)}
+.card-ta{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.card-n{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ac);background:rgba(124,106,239,.1);padding:3px 10px;border-radius:6px;white-space:nowrap}
+.card-s{font-size:12.5px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-tags{display:flex;gap:4px;flex-shrink:0}
+.tag{font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}
+.tag-jpa{background:rgba(78,205,196,.12);color:var(--green)}.tag-hib{background:rgba(124,106,239,.12);color:#a07aef}.tag-dep{background:rgba(239,107,107,.12);color:var(--red)}.tag-imp{background:rgba(247,160,70,.12);color:var(--orange)}.tag-q{background:rgba(91,141,239,.12);color:var(--blue)}
+.card-tg{font-size:16px;color:var(--t3);transition:transform .3s;flex-shrink:0}
+.card.open .card-tg{transform:rotate(180deg)}
+.card-bd{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.card.open .card-bd{max-height:5000px}
+.card-ct{padding:0 16px 16px;border-top:1px solid var(--border)}
+.card-ct p{font-size:12.5px;color:var(--t2);margin:14px 0 10px;line-height:1.7}
+.card-ct p code,.card-ct li code{font-family:var(--mono);font-size:11.5px;background:rgba(124,106,239,.1);color:var(--ac);padding:1px 5px;border-radius:4px}
+.card-ct h4{font-size:12.5px;font-weight:600;color:var(--t1);margin:14px 0 8px}
+.card-ct strong{color:var(--t1)}
+
+/* ========== CODE BLOCK ========== */
+.cb{position:relative;margin:10px 0;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.cb-hd{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:rgba(0,0,0,.4);border-bottom:1px solid var(--border)}
+.cb-lang{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+.cb-cp{background:0;border:1px solid var(--border);color:var(--t3);font-size:10px;font-family:var(--font);padding:3px 8px;border-radius:4px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:4px}
+.cb-cp:hover{color:var(--t1);border-color:var(--ac);background:rgba(124,106,239,.1)}
+.cb-cp.copied{color:var(--green);border-color:var(--green)}
+.cb pre{padding:14px;overflow-x:auto;background:rgba(5,5,12,.6);margin:0;-webkit-overflow-scrolling:touch}
+.cb code{font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--t1);tab-size:4;white-space:pre}
+
+/* Syntax */
+.kw{color:#c792ea;font-weight:600}.type{color:#ffcb6b}.str{color:#c3e88d}.num{color:#f78c6c}.ann{color:#f7a046;font-weight:500}.cm{color:#546e7a;font-style:italic}.fn{color:#82aaff}.op{color:#89ddff}
+.xml-tag{color:#f07178}.xml-attr{color:#ffcb6b}.xml-val{color:#c3e88d}
+
+/* ========== INFO BOX ========== */
+.ib{display:flex;gap:10px;padding:12px 14px;border-radius:8px;margin:10px 0;font-size:12.5px;line-height:1.6;border:1px solid}
+.ib-i{font-size:16px;flex-shrink:0;margin-top:1px}
+.ib.tip{background:rgba(78,205,196,.08);border-color:rgba(78,205,196,.15);color:var(--green)}
+.ib.warn{background:rgba(247,160,70,.08);border-color:rgba(247,160,70,.15);color:var(--orange)}
+.ib.danger{background:rgba(239,107,107,.08);border-color:rgba(239,107,107,.15);color:var(--red)}
+.ib.info{background:rgba(91,141,239,.08);border-color:rgba(91,141,239,.15);color:var(--blue)}
+
+/* ========== TABLE ========== */
+.tw{overflow-x:auto;margin:10px 0;border-radius:10px;border:1px solid var(--border);-webkit-overflow-scrolling:touch}
+.tw table{width:100%;border-collapse:collapse;font-size:12.5px}
+.tw th{background:rgba(0,0,0,.3);padding:10px 14px;text-align:left;font-weight:600;color:var(--t1);border-bottom:1px solid var(--border);white-space:nowrap}
+.tw td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--t2)}
+.tw tr:last-child td{border-bottom:0}
+.tw tr:hover td{background:rgba(255,255,255,.03)}
+.tw code{font-family:var(--mono);font-size:11px;background:rgba(124,106,239,.1);color:var(--ac);padding:1px 5px;border-radius:4px}
+
+/* ========== BACK TO TOP ========== */
+.btt{position:fixed;bottom:24px;right:20px;width:40px;height:40px;background:var(--gr);border:0;border-radius:50%;color:#fff;font-size:18px;cursor:pointer;z-index:80;opacity:0;transform:translateY(20px);transition:.3s;display:flex;align-items:center;justify-content:center}
+.btt.vis{opacity:1;transform:translateY(0)}
+.btt:hover{transform:translateY(-3px) scale(1.1)}
+
+/* ========== FOOTER ========== */
+footer{padding:28px 40px;border-top:1px solid var(--border);text-align:center;color:var(--t3);font-size:12px}
+footer a{color:var(--ac);text-decoration:none}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:1024px){
+    .side{transform:translateX(-100%);background:#101018;backdrop-filter:none}
+    .side.open{transform:translateX(0)}
+    .overlay.on{display:block}
+    .ham{display:flex}
+    .main{margin-left:0;width:100%;max-width:100vw}
+    .hero{padding:68px 20px 28px}
+    .hero h1{font-size:26px}
+    .content{padding:24px 16px 50px}
+    .card-tags{display:none}
+    .sec{scroll-margin-top:70px}
+    .stats{gap:8px}
+}
+@media(max-width:768px){
+    .hero{padding:64px 14px 24px}
+    .hero h1{font-size:22px;line-height:1.3}
+    .hero p{font-size:13px}
+    .badge{font-size:9px;padding:4px 10px}
+    .stats{flex-direction:column;gap:6px}
+    .stat{width:100%;justify-content:flex-start}
+    .content{padding:18px 12px 40px}
+    .sec-hd{gap:8px;margin-bottom:14px;padding-bottom:10px}
+    .sec-ic{width:34px;height:34px;font-size:16px}
+    .sec-t{font-size:18px}
+    .sec-d{font-size:12px;margin-bottom:14px}
+    .card-hd{padding:10px 12px;flex-wrap:wrap;gap:6px}
+    .card-ta{flex-direction:column;align-items:flex-start;gap:4px;width:calc(100% - 30px)}
+    .card-n{font-size:11px;padding:3px 8px;white-space:normal;word-break:break-all}
+    .card-s{white-space:normal;font-size:11px;line-height:1.4}
+    .card-ct{padding:0 12px 12px}
+    .card-ct p,.card-ct h4{font-size:11.5px}
+    .cb pre{padding:10px 8px}
+    .cb code{font-size:10.5px;line-height:1.5}
+    .cb-hd{padding:5px 8px}
+    .cb-lang{font-size:9px}
+    .cb-cp{font-size:9px;padding:2px 6px}
+    .ib{padding:8px 10px;font-size:11px;gap:8px}
+    .tw table{font-size:11px;min-width:420px}
+    .tw th{padding:7px 10px;font-size:10px}.tw td{padding:6px 10px}
+    footer{padding:18px 12px;font-size:11px}
+    .btt{bottom:16px;right:14px;width:36px;height:36px;font-size:16px}
+}
+@media(max-width:400px){
+    .hero{padding:58px 10px 18px}
+    .hero h1{font-size:19px}
+    .hero p{font-size:12px}
+    .content{padding:14px 8px 32px}
+    .sec-t{font-size:16px}
+    .sec-ic{width:30px;height:30px;font-size:14px}
+    .card-n{font-size:10px}
+    .cb code{font-size:9.5px;tab-size:2}
+    .cb pre{padding:8px 6px}
+    .side{width:250px}
+    footer{font-size:10px}
+}
+@media(hover:none)and (pointer:coarse){
+    .card:hover{transform:none;box-shadow:none;border-color:var(--border)}
+    .card-hd{min-height:44px}
+    .nav-a{min-height:42px;padding:9px 16px}
+    .cb-cp{min-height:30px;min-width:54px;justify-content:center}
+}
+@media print{.side,.ham,.overlay,.btt,.bg-fx,.cb-cp{display:none!important}.main{margin-left:0!important}.card-bd{max-height:none!important}.card{break-inside:avoid}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-fx"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+<!-- Hamburger -->
+<button class="ham" id="ham" aria-label="Menu">☰</button>
+<div class="overlay" id="overlay"></div>
+
+<div class="wrap">
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="side" id="side">
+    <div class="side-hd">
+        <div class="side-icon">H</div>
+        <div><div class="side-title">Hibernate</div><div class="side-sub">Command Reference</div></div>
+    </div>
+    <div class="side-search"><div class="s-wrap"><input type="text" id="search" placeholder="ค้นหาคำสั่ง..."></div></div>
+    <nav class="side-nav">
+        <div class="nav-g"><div class="nav-gt">Getting Started</div>
+            <a class="nav-a" data-s="s1"><span class="nav-i">⚙️</span>Configuration</a>
+            <a class="nav-a" data-s="s2"><span class="nav-i">📦</span>Entity Mapping<span class="nav-b">15+</span></a>
+        </div>
+        <div class="nav-g"><div class="nav-gt">Core API</div>
+            <a class="nav-a" data-s="s3"><span class="nav-i">🔌</span>Session API<span class="nav-b">12</span></a>
+            <a class="nav-a" data-s="s4"><span class="nav-i">🔒</span>Transaction</a>
+        </div>
+        <div class="nav-g"><div class="nav-gt">Queries</div>
+            <a class="nav-a" data-s="s5"><span class="nav-i">📝</span>HQL / JPQL<span class="nav-b">10+</span></a>
+            <a class="nav-a" data-s="s6"><span class="nav-i">🔎</span>Criteria API</a>
+            <a class="nav-a" data-s="s7"><span class="nav-i">🗃️</span>Native SQL</a>
+        </div>
+        <div class="nav-g"><div class="nav-gt">Relationships</div>
+            <a class="nav-a" data-s="s8"><span class="nav-i">🔗</span>Relationship Mapping<span class="nav-b">4</span></a>
+            <a class="nav-a" data-s="s9"><span class="nav-i">📐</span>Inheritance</a>
+        </div>
+        <div class="nav-g"><div class="nav-gt">Advanced</div>
+            <a class="nav-a" data-s="s10"><span class="nav-i">⚡</span>Caching</a>
+            <a class="nav-a" data-s="s11"><span class="nav-i">🔄</span>Entity Lifecycle</a>
+            <a class="nav-a" data-s="s12"><span class="nav-i">📌</span>Named Queries</a>
+            <a class="nav-a" data-s="s13"><span class="nav-i">📊</span>Batch Processing</a>
+        </div>
+    </nav>
+    <div class="side-ft">Hibernate ORM 5.6 &bull; Java 11+<br><a href="https://hibernate.org/orm/documentation/" target="_blank">Official Docs ↗</a></div>
+</aside>
+
+<!-- ========== MAIN ========== -->
+<main class="main">
+
+<section class="hero">
+    <div class="hero-c">
+        <div class="badge">🐻 HIBERNATE ORM 5.6 &bull; COMPLETE REFERENCE</div>
+        <h1>Hibernate Command<br>Reference Guide</h1>
+        <p>คู่มือสรุปคำสั่ง Hibernate ORM ทั้งหมดสำหรับ Java Developer — ครอบคลุม Configuration, Annotations, Session API, HQL, Criteria API, Caching และอื่นๆ พร้อมตัวอย่างโค้ดที่ใช้งานได้จริง</p>
+        <div class="stats">
+            <div class="stat"><b>60+</b><span>คำสั่งทั้งหมด</span></div>
+            <div class="stat"><b>13</b><span>หมวดหมู่</span></div>
+            <div class="stat"><b>50+</b><span>ตัวอย่างโค้ด</span></div>
+            <div class="stat"><b>H2</b><span>Database</span></div>
+        </div>
+    </div>
+</section>
+
+<div class="content">
+
+<!-- ============ SECTION 1: CONFIGURATION ============ -->
+<section class="sec" id="s1">
+    <div class="sec-hd"><div class="sec-ic pur">⚙️</div><h2 class="sec-t">Configuration</h2></div>
+    <p class="sec-d">การตั้งค่า Hibernate สามารถทำได้ผ่านไฟล์ <code>hibernate.cfg.xml</code> หรือ <code>persistence.xml</code> (JPA)</p>
+
+    <div class="card open">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">hibernate.cfg.xml</span><span class="card-s">ไฟล์ตั้งค่าหลักของ Hibernate</span></div><div class="card-tags"><span class="tag tag-hib">Hibernate</span><span class="tag tag-imp">สำคัญ</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <p>ไฟล์ใช้กำหนดค่า DB connection, SQL Dialect, Mapping วางไว้ใน <code>src/main/resources/</code></p>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">XML</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="cm">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="cm">&lt;!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd"&gt;</span>
+
+<span class="xml-tag">&lt;hibernate-configuration&gt;</span>
+  <span class="xml-tag">&lt;session-factory&gt;</span>
+    <span class="cm">&lt;!-- Database Connection (H2 In-Memory) --&gt;</span>
+    <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.connection.driver_class"</span><span class="xml-tag">&gt;</span>org.h2.Driver<span class="xml-tag">&lt;/property&gt;</span>
+    <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.connection.url"</span><span class="xml-tag">&gt;</span>jdbc:h2:mem:testdb<span class="xml-tag">&lt;/property&gt;</span>
+    <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.connection.username"</span><span class="xml-tag">&gt;</span>sa<span class="xml-tag">&lt;/property&gt;</span>
+    <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.connection.password"</span><span class="xml-tag">&gt;</span><span class="xml-tag">&lt;/property&gt;</span>
+
+    <span class="cm">&lt;!-- SQL Dialect &amp; DDL --&gt;</span>
+    <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.dialect"</span><span class="xml-tag">&gt;</span>org.hibernate.dialect.H2Dialect<span class="xml-tag">&lt;/property&gt;</span>
+    <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.hbm2ddl.auto"</span><span class="xml-tag">&gt;</span>update<span class="xml-tag">&lt;/property&gt;</span>
+    <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.show_sql"</span><span class="xml-tag">&gt;</span>true<span class="xml-tag">&lt;/property&gt;</span>
+    <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.format_sql"</span><span class="xml-tag">&gt;</span>true<span class="xml-tag">&lt;/property&gt;</span>
+
+    <span class="cm">&lt;!-- Entity Mapping --&gt;</span>
+    <span class="xml-tag">&lt;mapping</span> <span class="xml-attr">class=</span><span class="xml-val">"com.example.entity.Employee"</span> <span class="xml-tag">/&gt;</span>
+  <span class="xml-tag">&lt;/session-factory&gt;</span>
+<span class="xml-tag">&lt;/hibernate-configuration&gt;</span></code></pre>
+            </div>
+            <h4>Property สำคัญทั้งหมด:</h4>
+            <div class="tw"><table><thead><tr><th>Property</th><th>คำอธิบาย</th><th>ค่าตัวอย่าง</th></tr></thead><tbody>
+                <tr><td><code>connection.driver_class</code></td><td>JDBC Driver</td><td>org.h2.Driver</td></tr>
+                <tr><td><code>connection.url</code></td><td>JDBC URL</td><td>jdbc:h2:mem:testdb</td></tr>
+                <tr><td><code>dialect</code></td><td>SQL Dialect</td><td>org.hibernate.dialect.H2Dialect</td></tr>
+                <tr><td><code>hbm2ddl.auto</code></td><td>DDL auto</td><td>create / update / validate / none</td></tr>
+                <tr><td><code>show_sql</code></td><td>แสดง SQL</td><td>true / false</td></tr>
+                <tr><td><code>format_sql</code></td><td>Format SQL</td><td>true / false</td></tr>
+                <tr><td><code>connection.pool_size</code></td><td>Pool size</td><td>10</td></tr>
+                <tr><td><code>cache.use_second_level_cache</code></td><td>L2 cache</td><td>true / false</td></tr>
+            </tbody></table></div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">SessionFactory</span><span class="card-s">สร้าง SessionFactory จาก Configuration</span></div><div class="card-tags"><span class="tag tag-hib">Hibernate</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <p><code>SessionFactory</code> เป็น thread-safe object สร้างครั้งเดียวตลอด application lifecycle</p>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="kw">import</span> org.hibernate.SessionFactory;
+<span class="kw">import</span> org.hibernate.cfg.Configuration;
+
+<span class="kw">public class</span> <span class="type">HibernateUtil</span> {
+    <span class="kw">private static final</span> <span class="type">SessionFactory</span> sessionFactory;
+
+    <span class="kw">static</span> {
+        <span class="kw">try</span> {
+            sessionFactory = <span class="kw">new</span> <span class="type">Configuration</span>()
+                .<span class="fn">configure</span>(<span class="str">"hibernate.cfg.xml"</span>)
+                .<span class="fn">buildSessionFactory</span>();
+        } <span class="kw">catch</span> (<span class="type">Throwable</span> ex) {
+            <span class="kw">throw new</span> <span class="type">ExceptionInInitializerError</span>(ex);
+        }
+    }
+
+    <span class="kw">public static</span> <span class="type">SessionFactory</span> <span class="fn">getSessionFactory</span>() {
+        <span class="kw">return</span> sessionFactory;
+    }
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">persistence.xml</span><span class="card-s">JPA Standard Configuration</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <p>ไฟล์ตั้งค่าแบบ JPA วางใน <code>META-INF/persistence.xml</code></p>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">XML</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="xml-tag">&lt;persistence</span> <span class="xml-attr">xmlns=</span><span class="xml-val">"http://xmlns.jcp.org/xml/ns/persistence"</span> <span class="xml-attr">version=</span><span class="xml-val">"2.2"</span><span class="xml-tag">&gt;</span>
+  <span class="xml-tag">&lt;persistence-unit</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernateDemo"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-tag">&lt;provider&gt;</span>org.hibernate.jpa.HibernatePersistenceProvider<span class="xml-tag">&lt;/provider&gt;</span>
+    <span class="xml-tag">&lt;class&gt;</span>com.example.entity.Employee<span class="xml-tag">&lt;/class&gt;</span>
+    <span class="xml-tag">&lt;properties&gt;</span>
+      <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"javax.persistence.jdbc.driver"</span> <span class="xml-attr">value=</span><span class="xml-val">"org.h2.Driver"</span> <span class="xml-tag">/&gt;</span>
+      <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"javax.persistence.jdbc.url"</span> <span class="xml-attr">value=</span><span class="xml-val">"jdbc:h2:mem:testdb"</span> <span class="xml-tag">/&gt;</span>
+      <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.dialect"</span> <span class="xml-attr">value=</span><span class="xml-val">"org.hibernate.dialect.H2Dialect"</span> <span class="xml-tag">/&gt;</span>
+      <span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.hbm2ddl.auto"</span> <span class="xml-attr">value=</span><span class="xml-val">"update"</span> <span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/properties&gt;</span>
+  <span class="xml-tag">&lt;/persistence-unit&gt;</span>
+<span class="xml-tag">&lt;/persistence&gt;</span></code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 2: ENTITY MAPPING ============ -->
+<section class="sec" id="s2">
+    <div class="sec-hd"><div class="sec-ic grn">📦</div><h2 class="sec-t">Entity Mapping Annotations</h2></div>
+    <p class="sec-d">Annotations สำหรับ map Java class ไปยัง database table</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@Entity / @Table</span><span class="card-s">ประกาศ entity class และกำหนดชื่อตาราง</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span><span class="tag tag-imp">สำคัญ</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="kw">import</span> javax.persistence.*;
+
+<span class="ann">@Entity</span>
+<span class="ann">@Table</span>(name = <span class="str">"employees"</span>,
+       uniqueConstraints = <span class="ann">@UniqueConstraint</span>(columnNames = {<span class="str">"email"</span>}))
+<span class="kw">public class</span> <span class="type">Employee</span> {
+
+    <span class="ann">@Id</span>
+    <span class="ann">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.IDENTITY)
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@Column</span>(name = <span class="str">"full_name"</span>, nullable = <span class="kw">false</span>, length = <span class="num">100</span>)
+    <span class="kw">private</span> <span class="type">String</span> name;
+
+    <span class="ann">@Column</span>(unique = <span class="kw">true</span>, length = <span class="num">150</span>)
+    <span class="kw">private</span> <span class="type">String</span> email;
+
+    <span class="ann">@Column</span>(precision = <span class="num">10</span>, scale = <span class="num">2</span>)
+    <span class="kw">private</span> <span class="type">Double</span> salary;
+
+    <span class="kw">public</span> <span class="fn">Employee</span>() {}
+}</code></pre>
+            </div>
+            <div class="ib tip"><span class="ib-i">💡</span><div>Entity class ต้องมี no-arg constructor (public หรือ protected)</div></div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@Id / @GeneratedValue</span><span class="card-s">กำหนด Primary Key และ strategy การสร้าง ID</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="cm">// Strategy 1: IDENTITY — auto-increment ของ DB</span>
+<span class="ann">@Id</span>
+<span class="ann">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.IDENTITY)
+<span class="kw">private</span> <span class="type">Long</span> id;
+
+<span class="cm">// Strategy 2: SEQUENCE — ใช้ sequence ของ DB</span>
+<span class="ann">@Id</span>
+<span class="ann">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.SEQUENCE, generator = <span class="str">"emp_seq"</span>)
+<span class="ann">@SequenceGenerator</span>(name = <span class="str">"emp_seq"</span>, sequenceName = <span class="str">"employee_sequence"</span>, allocationSize = <span class="num">1</span>)
+<span class="kw">private</span> <span class="type">Long</span> id;
+
+<span class="cm">// Strategy 3: AUTO — Hibernate เลือกให้อัตโนมัติ</span>
+<span class="ann">@Id</span>
+<span class="ann">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.AUTO)
+<span class="kw">private</span> <span class="type">Long</span> id;</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@Column</span><span class="card-s">กำหนดรายละเอียดของ column</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Column</span>(
+    name = <span class="str">"full_name"</span>,         <span class="cm">// ชื่อ column ใน DB</span>
+    nullable = <span class="kw">false</span>,            <span class="cm">// NOT NULL</span>
+    unique = <span class="kw">true</span>,               <span class="cm">// UNIQUE</span>
+    length = <span class="num">100</span>,                <span class="cm">// VARCHAR length</span>
+    insertable = <span class="kw">true</span>,           <span class="cm">// รวมใน INSERT</span>
+    updatable = <span class="kw">true</span>,            <span class="cm">// รวมใน UPDATE</span>
+    columnDefinition = <span class="str">"TEXT"</span>,   <span class="cm">// กำหนด SQL type</span>
+    precision = <span class="num">10</span>,              <span class="cm">// decimal ตัวเลขทั้งหมด</span>
+    scale = <span class="num">2</span>                     <span class="cm">// decimal ทศนิยม</span>
+)
+<span class="kw">private</span> <span class="type">String</span> name;</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@Transient / @Lob / @Enumerated / @Temporal</span><span class="card-s">Annotations สำหรับ field พิเศษ</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Product</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.IDENTITY)
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@Transient</span>                          <span class="cm">// ไม่ถูกเก็บใน DB</span>
+    <span class="kw">private</span> <span class="type">String</span> temporaryNote;
+
+    <span class="ann">@Lob</span>                                <span class="cm">// Large Object (CLOB/BLOB)</span>
+    <span class="kw">private</span> <span class="type">String</span> description;
+
+    <span class="ann">@Enumerated</span>(<span class="type">EnumType</span>.STRING)         <span class="cm">// เก็บเป็นชื่อ: "ACTIVE"</span>
+    <span class="kw">private</span> <span class="type">Status</span> status;
+
+    <span class="ann">@Temporal</span>(<span class="type">TemporalType</span>.TIMESTAMP)    <span class="cm">// วันที่+เวลา</span>
+    <span class="kw">private</span> <span class="type">Date</span> createdAt;
+}
+<span class="kw">enum</span> <span class="type">Status</span> { ACTIVE, INACTIVE, PENDING }</code></pre>
+            </div>
+            <div class="ib info"><span class="ib-i">📌</span><div>Java 8+ (<code>LocalDate</code>, <code>LocalDateTime</code>) ไม่ต้องใช้ <code>@Temporal</code></div></div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@Embeddable / @Embedded</span><span class="card-s">ฝัง value object ไว้ในตารางเดียวกัน</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Embeddable</span>
+<span class="kw">public class</span> <span class="type">Address</span> {
+    <span class="kw">private</span> <span class="type">String</span> street;
+    <span class="kw">private</span> <span class="type">String</span> city;
+    <span class="kw">private</span> <span class="type">String</span> zipCode;
+}
+
+<span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Employee</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@Embedded</span>
+    <span class="kw">private</span> <span class="type">Address</span> homeAddress;
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@Version</span><span class="card-s">Optimistic Locking — ป้องกัน concurrent update</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Product</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@Version</span>
+    <span class="kw">private</span> <span class="type">Integer</span> version;
+    <span class="cm">// Hibernate เพิ่ม version +1 ทุกครั้งที่ update</span>
+    <span class="cm">// ถ้า version ไม่ตรง → OptimisticLockException</span>
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@DynamicInsert / @DynamicUpdate / @NaturalId</span><span class="card-s">Hibernate-specific annotations</span></div><div class="card-tags"><span class="tag tag-hib">Hibernate</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="kw">import</span> org.hibernate.annotations.*;
+
+<span class="ann">@Entity</span>
+<span class="ann">@DynamicInsert</span>     <span class="cm">// INSERT เฉพาะ column ที่ไม่เป็น null</span>
+<span class="ann">@DynamicUpdate</span>     <span class="cm">// UPDATE เฉพาะ column ที่เปลี่ยน</span>
+<span class="kw">public class</span> <span class="type">User</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@NaturalId</span>         <span class="cm">// Business key — immutable, unique</span>
+    <span class="kw">private</span> <span class="type">String</span> email;
+
+    <span class="ann">@CreationTimestamp</span> <span class="cm">// บันทึกเวลาตอนสร้าง</span>
+    <span class="kw">private</span> <span class="type">LocalDateTime</span> createdAt;
+
+    <span class="ann">@UpdateTimestamp</span>   <span class="cm">// บันทึกเวลาตอนอัพเดท</span>
+    <span class="kw">private</span> <span class="type">LocalDateTime</span> updatedAt;
+
+    <span class="ann">@Formula</span>(<span class="str">"salary * 12"</span>)  <span class="cm">// คำนวณจาก SQL expression</span>
+    <span class="kw">private</span> <span class="type">Double</span> annualSalary;
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 3: SESSION API ============ -->
+<section class="sec" id="s3">
+    <div class="sec-hd"><div class="sec-ic blu">🔌</div><h2 class="sec-t">Session API</h2></div>
+    <p class="sec-d">Session เป็น core interface ของ Hibernate สำหรับ CRUD operations</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">session.persist()</span><span class="card-s">บันทึก entity ใหม่ลง DB (INSERT)</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span><span class="tag tag-imp">แนะนำ</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <p>เปลี่ยนสถานะ entity จาก <strong>Transient → Persistent</strong></p>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="type">Session</span> session = <span class="type">HibernateUtil</span>.<span class="fn">getSessionFactory</span>().<span class="fn">openSession</span>();
+<span class="type">Transaction</span> tx = session.<span class="fn">beginTransaction</span>();
+
+<span class="type">Employee</span> emp = <span class="kw">new</span> <span class="type">Employee</span>();
+emp.<span class="fn">setName</span>(<span class="str">"สมชาย ใจดี"</span>);
+emp.<span class="fn">setEmail</span>(<span class="str">"somchai@example.com"</span>);
+
+session.<span class="fn">persist</span>(emp);   <span class="cm">// Transient → Persistent</span>
+tx.<span class="fn">commit</span>();
+session.<span class="fn">close</span>();</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">session.save()</span><span class="card-s">บันทึก entity + return ID ทันที</span></div><div class="card-tags"><span class="tag tag-hib">Hibernate</span><span class="tag tag-dep">Deprecated</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="type">Serializable</span> id = session.<span class="fn">save</span>(emp);  <span class="cm">// return ID ทันที</span>
+<span class="type">System</span>.out.<span class="fn">println</span>(<span class="str">"Generated ID: "</span> + id);</code></pre>
+            </div>
+            <div class="ib warn"><span class="ib-i">⚠️</span><div><code>save()</code> deprecated ใน Hibernate 6+ ใช้ <code>persist()</code> แทน</div></div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">session.get() / session.load()</span><span class="card-s">ดึง entity ด้วย Primary Key</span></div><div class="card-tags"><span class="tag tag-hib">Hibernate</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="cm">// get() — query DB ทันที, return null ถ้าไม่เจอ</span>
+<span class="type">Employee</span> emp1 = session.<span class="fn">get</span>(<span class="type">Employee</span>.<span class="kw">class</span>, <span class="num">1L</span>);
+
+<span class="cm">// load() — return proxy (lazy), exception ถ้าไม่เจอ</span>
+<span class="type">Employee</span> emp2 = session.<span class="fn">load</span>(<span class="type">Employee</span>.<span class="kw">class</span>, <span class="num">2L</span>);</code></pre>
+            </div>
+            <div class="tw"><table><thead><tr><th>ฟีเจอร์</th><th><code>get()</code></th><th><code>load()</code></th></tr></thead><tbody>
+                <tr><td>Loading</td><td>Eager (ทันที)</td><td>Lazy (proxy)</td></tr>
+                <tr><td>ไม่เจอ</td><td>return <code>null</code></td><td>throw <code>ObjectNotFoundException</code></td></tr>
+                <tr><td>JPA</td><td><code>find()</code></td><td><code>getReference()</code></td></tr>
+            </tbody></table></div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">session.merge()</span><span class="card-s">Copy state จาก detached ไปยัง persistent</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span><span class="tag tag-imp">แนะนำ</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="type">Employee</span> detached = <span class="kw">new</span> <span class="type">Employee</span>();
+detached.<span class="fn">setId</span>(<span class="num">1L</span>);
+detached.<span class="fn">setName</span>(<span class="str">"Updated Name"</span>);
+
+<span class="type">Employee</span> managed = (<span class="type">Employee</span>) session.<span class="fn">merge</span>(detached);
+<span class="cm">// managed เป็น persistent copy ตัวใหม่</span></code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">session.remove() / session.delete()</span><span class="card-s">ลบ entity จาก DB (DELETE)</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="type">Employee</span> emp = session.<span class="fn">get</span>(<span class="type">Employee</span>.<span class="kw">class</span>, <span class="num">1L</span>);
+<span class="kw">if</span> (emp != <span class="kw">null</span>) {
+    session.<span class="fn">remove</span>(emp);   <span class="cm">// JPA standard (แนะนำ)</span>
+    <span class="cm">// session.delete(emp); // Hibernate-specific (deprecated)</span>
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">flush() / clear() / evict() / refresh()</span><span class="card-s">จัดการ Session cache</span></div><div class="card-tags"><span class="tag tag-hib">Hibernate</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code>session.<span class="fn">flush</span>();     <span class="cm">// sync changes กับ DB ทันที</span>
+session.<span class="fn">refresh</span>(emp); <span class="cm">// โหลดข้อมูลจาก DB มาทับ</span>
+session.<span class="fn">evict</span>(emp);   <span class="cm">// ลบ entity ออกจาก cache → detached</span>
+session.<span class="fn">clear</span>();      <span class="cm">// ล้าง first-level cache ทั้งหมด</span>
+<span class="kw">boolean</span> ok = session.<span class="fn">contains</span>(emp); <span class="cm">// false</span></code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">session.createQuery()</span><span class="card-s">สร้าง HQL/JPQL query</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span><span class="tag tag-q">Query</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="cm">// ดึงทั้งหมด</span>
+<span class="type">List</span>&lt;<span class="type">Employee</span>&gt; all = session
+    .<span class="fn">createQuery</span>(<span class="str">"FROM Employee"</span>, <span class="type">Employee</span>.<span class="kw">class</span>)
+    .<span class="fn">getResultList</span>();
+
+<span class="cm">// ค้นหาด้วย parameter + pagination</span>
+<span class="type">List</span>&lt;<span class="type">Employee</span>&gt; results = session
+    .<span class="fn">createQuery</span>(<span class="str">"FROM Employee e WHERE e.salary > :min"</span>, <span class="type">Employee</span>.<span class="kw">class</span>)
+    .<span class="fn">setParameter</span>(<span class="str">"min"</span>, <span class="num">50000.0</span>)
+    .<span class="fn">setFirstResult</span>(<span class="num">0</span>)
+    .<span class="fn">setMaxResults</span>(<span class="num">10</span>)
+    .<span class="fn">getResultList</span>();</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 4: TRANSACTION ============ -->
+<section class="sec" id="s4">
+    <div class="sec-hd"><div class="sec-ic org">🔒</div><h2 class="sec-t">Transaction Management</h2></div>
+    <p class="sec-d">ทุกการเปลี่ยนแปลงข้อมูลต้องอยู่ภายใน Transaction</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">Transaction Pattern</span><span class="card-s">รูปแบบมาตรฐาน try-catch-finally</span></div><div class="card-tags"><span class="tag tag-imp">สำคัญ</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="type">Session</span> session = <span class="kw">null</span>;
+<span class="type">Transaction</span> tx = <span class="kw">null</span>;
+<span class="kw">try</span> {
+    session = <span class="type">HibernateUtil</span>.<span class="fn">getSessionFactory</span>().<span class="fn">openSession</span>();
+    tx = session.<span class="fn">beginTransaction</span>();
+
+    <span class="cm">// Business Logic</span>
+    <span class="type">Employee</span> emp = <span class="kw">new</span> <span class="type">Employee</span>(<span class="str">"สมศรี"</span>, <span class="str">"somsri@example.com"</span>, <span class="num">60000.0</span>);
+    session.<span class="fn">persist</span>(emp);
+
+    tx.<span class="fn">commit</span>();       <span class="cm">// สำเร็จ → commit</span>
+} <span class="kw">catch</span> (<span class="type">Exception</span> e) {
+    <span class="kw">if</span> (tx != <span class="kw">null</span>) tx.<span class="fn">rollback</span>();  <span class="cm">// ผิดพลาด → rollback</span>
+    e.<span class="fn">printStackTrace</span>();
+} <span class="kw">finally</span> {
+    <span class="kw">if</span> (session != <span class="kw">null</span>) session.<span class="fn">close</span>();
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 5: HQL ============ -->
+<section class="sec" id="s5">
+    <div class="sec-hd"><div class="sec-ic blu">📝</div><h2 class="sec-t">HQL / JPQL Queries</h2></div>
+    <p class="sec-d">Hibernate Query Language — ภาษาคล้าย SQL แต่อ้างอิงจาก Entity class</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">HQL SELECT / WHERE / JOIN</span><span class="card-s">Query ข้อมูลแบบต่างๆ</span></div><div class="card-tags"><span class="tag tag-q">Query</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="cm">// SELECT ทั้งหมด</span>
+<span class="type">List</span>&lt;<span class="type">Employee</span>&gt; all = session.<span class="fn">createQuery</span>(<span class="str">"FROM Employee"</span>, <span class="type">Employee</span>.<span class="kw">class</span>).<span class="fn">getResultList</span>();
+
+<span class="cm">// WHERE + Named Parameters</span>
+<span class="type">List</span>&lt;<span class="type">Employee</span>&gt; filtered = session
+    .<span class="fn">createQuery</span>(<span class="str">"FROM Employee e WHERE e.salary > :min AND e.name LIKE :name"</span>, <span class="type">Employee</span>.<span class="kw">class</span>)
+    .<span class="fn">setParameter</span>(<span class="str">"min"</span>, <span class="num">30000.0</span>)
+    .<span class="fn">setParameter</span>(<span class="str">"name"</span>, <span class="str">"%สม%"</span>)
+    .<span class="fn">getResultList</span>();
+
+<span class="cm">// JOIN FETCH (แก้ N+1 problem)</span>
+<span class="type">List</span>&lt;<span class="type">Department</span>&gt; depts = session
+    .<span class="fn">createQuery</span>(<span class="str">"FROM Department d JOIN FETCH d.employees"</span>, <span class="type">Department</span>.<span class="kw">class</span>)
+    .<span class="fn">getResultList</span>();
+
+<span class="cm">// Aggregate Functions</span>
+<span class="type">Long</span> count = session.<span class="fn">createQuery</span>(<span class="str">"SELECT COUNT(e) FROM Employee e"</span>, <span class="type">Long</span>.<span class="kw">class</span>).<span class="fn">uniqueResult</span>();
+<span class="type">Double</span> avg = session.<span class="fn">createQuery</span>(<span class="str">"SELECT AVG(e.salary) FROM Employee e"</span>, <span class="type">Double</span>.<span class="kw">class</span>).<span class="fn">uniqueResult</span>();
+
+<span class="cm">// Bulk UPDATE / DELETE</span>
+<span class="kw">int</span> updated = session.<span class="fn">createQuery</span>(<span class="str">"UPDATE Employee SET salary = salary * 1.1 WHERE salary < :min"</span>)
+    .<span class="fn">setParameter</span>(<span class="str">"min"</span>, <span class="num">30000.0</span>)
+    .<span class="fn">executeUpdate</span>();</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 6: CRITERIA API ============ -->
+<section class="sec" id="s6">
+    <div class="sec-hd"><div class="sec-ic pur">🔎</div><h2 class="sec-t">Criteria API</h2></div>
+    <p class="sec-d">Type-safe query builder — ไม่ต้องเขียน HQL string ป้องกัน typo</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">CriteriaBuilder / CriteriaQuery</span><span class="card-s">สร้าง query แบบ Type-Safe</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="type">CriteriaBuilder</span> cb = session.<span class="fn">getCriteriaBuilder</span>();
+<span class="type">CriteriaQuery</span>&lt;<span class="type">Employee</span>&gt; cr = cb.<span class="fn">createQuery</span>(<span class="type">Employee</span>.<span class="kw">class</span>);
+<span class="type">Root</span>&lt;<span class="type">Employee</span>&gt; root = cr.<span class="fn">from</span>(<span class="type">Employee</span>.<span class="kw">class</span>);
+
+<span class="cm">// Predicates</span>
+<span class="type">Predicate</span> salaryGt = cb.<span class="fn">greaterThan</span>(root.<span class="fn">get</span>(<span class="str">"salary"</span>), <span class="num">50000.0</span>);
+<span class="type">Predicate</span> nameLike = cb.<span class="fn">like</span>(root.<span class="fn">get</span>(<span class="str">"name"</span>), <span class="str">"%สม%"</span>);
+
+cr.<span class="fn">select</span>(root).<span class="fn">where</span>(cb.<span class="fn">and</span>(salaryGt, nameLike));
+cr.<span class="fn">orderBy</span>(cb.<span class="fn">desc</span>(root.<span class="fn">get</span>(<span class="str">"salary"</span>)));
+
+<span class="type">List</span>&lt;<span class="type">Employee</span>&gt; results = session.<span class="fn">createQuery</span>(cr).<span class="fn">getResultList</span>();
+
+<span class="cm">// Aggregate: count, sum, avg, max, min</span>
+<span class="type">CriteriaQuery</span>&lt;<span class="type">Long</span>&gt; countQ = cb.<span class="fn">createQuery</span>(<span class="type">Long</span>.<span class="kw">class</span>);
+countQ.<span class="fn">select</span>(cb.<span class="fn">count</span>(countQ.<span class="fn">from</span>(<span class="type">Employee</span>.<span class="kw">class</span>)));
+<span class="type">Long</span> total = session.<span class="fn">createQuery</span>(countQ).<span class="fn">getSingleResult</span>();</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 7: NATIVE SQL ============ -->
+<section class="sec" id="s7">
+    <div class="sec-hd"><div class="sec-ic red">🗃️</div><h2 class="sec-t">Native SQL</h2></div>
+    <p class="sec-d">เขียน SQL ดิบตรงฐานข้อมูล — ใช้เมื่อ HQL ทำไม่ได้</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">createNativeQuery()</span><span class="card-s">เขียน SQL แบบดั้งเดิม</span></div><div class="card-tags"><span class="tag tag-q">Query</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="cm">// Return Object[]</span>
+<span class="type">List</span>&lt;<span class="type">Object</span>[]&gt; rows = session
+    .<span class="fn">createNativeQuery</span>(<span class="str">"SELECT * FROM employees WHERE salary > 50000"</span>)
+    .<span class="fn">getResultList</span>();
+
+<span class="cm">// Map กลับเป็น Entity</span>
+<span class="type">List</span>&lt;<span class="type">Employee</span>&gt; emps = session
+    .<span class="fn">createNativeQuery</span>(<span class="str">"SELECT * FROM employees"</span>, <span class="type">Employee</span>.<span class="kw">class</span>)
+    .<span class="fn">getResultList</span>();
+
+<span class="cm">// Bulk Operation</span>
+<span class="kw">int</span> deleted = session
+    .<span class="fn">createNativeQuery</span>(<span class="str">"DELETE FROM audit_logs WHERE created_at < '2020-01-01'"</span>)
+    .<span class="fn">executeUpdate</span>();</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 8: RELATIONSHIPS ============ -->
+<section class="sec" id="s8">
+    <div class="sec-hd"><div class="sec-ic grn">🔗</div><h2 class="sec-t">Relationship Mapping</h2></div>
+    <p class="sec-d">การแมปความสัมพันธ์ระหว่าง Entity</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@OneToOne</span><span class="card-s">ความสัมพันธ์ 1:1</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">User</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@OneToOne</span>(cascade = <span class="type">CascadeType</span>.ALL)
+    <span class="ann">@JoinColumn</span>(name = <span class="str">"profile_id"</span>)
+    <span class="kw">private</span> <span class="type">UserProfile</span> profile;
+}
+
+<span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">UserProfile</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@OneToOne</span>(mappedBy = <span class="str">"profile"</span>)
+    <span class="kw">private</span> <span class="type">User</span> user;
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@OneToMany / @ManyToOne</span><span class="card-s">ความสัมพันธ์ 1:N</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Department</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@OneToMany</span>(mappedBy = <span class="str">"department"</span>, cascade = <span class="type">CascadeType</span>.ALL, orphanRemoval = <span class="kw">true</span>)
+    <span class="kw">private</span> <span class="type">List</span>&lt;<span class="type">Employee</span>&gt; employees = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+}
+
+<span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Employee</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@ManyToOne</span>(fetch = <span class="type">FetchType</span>.LAZY)
+    <span class="ann">@JoinColumn</span>(name = <span class="str">"dept_id"</span>)
+    <span class="kw">private</span> <span class="type">Department</span> department;
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@ManyToMany</span><span class="card-s">ความสัมพันธ์ N:N</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Student</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@ManyToMany</span>
+    <span class="ann">@JoinTable</span>(name = <span class="str">"student_course"</span>,
+        joinColumns = <span class="ann">@JoinColumn</span>(name = <span class="str">"student_id"</span>),
+        inverseJoinColumns = <span class="ann">@JoinColumn</span>(name = <span class="str">"course_id"</span>))
+    <span class="kw">private</span> <span class="type">Set</span>&lt;<span class="type">Course</span>&gt; courses = <span class="kw">new</span> <span class="type">HashSet</span>&lt;&gt;();
+}
+
+<span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Course</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+
+    <span class="ann">@ManyToMany</span>(mappedBy = <span class="str">"courses"</span>)
+    <span class="kw">private</span> <span class="type">Set</span>&lt;<span class="type">Student</span>&gt; students = <span class="kw">new</span> <span class="type">HashSet</span>&lt;&gt;();
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 9: INHERITANCE ============ -->
+<section class="sec" id="s9">
+    <div class="sec-hd"><div class="sec-ic org">📐</div><h2 class="sec-t">Inheritance Mapping</h2></div>
+    <p class="sec-d">แมปการสืบทอด Class ลงฐานข้อมูล</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">SINGLE_TABLE</span><span class="card-s">รวมทุก subclass ไว้ตารางเดียว (เร็วสุด)</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span><span class="tag tag-imp">Default</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="ann">@Inheritance</span>(strategy = <span class="type">InheritanceType</span>.SINGLE_TABLE)
+<span class="ann">@DiscriminatorColumn</span>(name = <span class="str">"vehicle_type"</span>)
+<span class="kw">public abstract class</span> <span class="type">Vehicle</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+    <span class="kw">private</span> <span class="type">String</span> brand;
+}
+
+<span class="ann">@Entity</span> <span class="ann">@DiscriminatorValue</span>(<span class="str">"CAR"</span>)
+<span class="kw">public class</span> <span class="type">Car</span> <span class="kw">extends</span> <span class="type">Vehicle</span> {
+    <span class="kw">private int</span> numberOfDoors;
+}
+
+<span class="ann">@Entity</span> <span class="ann">@DiscriminatorValue</span>(<span class="str">"BIKE"</span>)
+<span class="kw">public class</span> <span class="type">Bike</span> <span class="kw">extends</span> <span class="type">Vehicle</span> {
+    <span class="kw">private boolean</span> hasBasket;
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">JOINED</span><span class="card-s">แยกตารางแต่ละ class ใช้ FK โยงกัน</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="ann">@Inheritance</span>(strategy = <span class="type">InheritanceType</span>.JOINED)
+<span class="kw">public abstract class</span> <span class="type">Animal</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+    <span class="kw">private</span> <span class="type">String</span> name;
+}
+
+<span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Dog</span> <span class="kw">extends</span> <span class="type">Animal</span> {
+    <span class="kw">private</span> <span class="type">String</span> breed;
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">TABLE_PER_CLASS</span><span class="card-s">แยกตารางแต่ละ subclass คัดลอก field ทั้งหมด</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span><span class="tag tag-dep">ไม่แนะนำ</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="ann">@Inheritance</span>(strategy = <span class="type">InheritanceType</span>.TABLE_PER_CLASS)
+<span class="kw">public abstract class</span> <span class="type">BillingDetails</span> {
+    <span class="ann">@Id</span> <span class="kw">private</span> <span class="type">Long</span> id;
+    <span class="kw">private</span> <span class="type">String</span> owner;
+}
+
+<span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">CreditCard</span> <span class="kw">extends</span> <span class="type">BillingDetails</span> {
+    <span class="kw">private</span> <span class="type">String</span> cardNumber;
+}</code></pre>
+            </div>
+            <div class="ib warn"><span class="ib-i">⚠️</span><div>ไม่สามารถใช้ <code>@GeneratedValue(IDENTITY)</code> ได้ และ polymorphic query ช้ามากเนื่องจาก UNION</div></div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 10: CACHING ============ -->
+<section class="sec" id="s10">
+    <div class="sec-hd"><div class="sec-ic ylw">⚡</div><h2 class="sec-t">Caching</h2></div>
+    <p class="sec-d">Hibernate cache มี 2 ระดับ: First-level (Session) และ Second-level (SessionFactory)</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">Second-Level Cache</span><span class="card-s">Cache ข้าม Session ต้องตั้งค่าเพิ่ม</span></div><div class="card-tags"><span class="tag tag-hib">Hibernate</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <h4>ตั้งค่าใน hibernate.cfg.xml:</h4>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">XML</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.cache.use_second_level_cache"</span><span class="xml-tag">&gt;</span>true<span class="xml-tag">&lt;/property&gt;</span>
+<span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.cache.region.factory_class"</span><span class="xml-tag">&gt;</span>
+    org.hibernate.cache.ehcache.EhCacheRegionFactory
+<span class="xml-tag">&lt;/property&gt;</span></code></pre>
+            </div>
+            <h4>ใส่ที่ Entity:</h4>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="ann">@Cacheable</span>
+<span class="ann">@org.hibernate.annotations.Cache</span>(usage = <span class="type">CacheConcurrencyStrategy</span>.READ_WRITE)
+<span class="kw">public class</span> <span class="type">Product</span> { <span class="cm">/* ... */</span> }</code></pre>
+            </div>
+            <h4>Query Cache:</h4>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="type">List</span>&lt;<span class="type">Product</span>&gt; list = session
+    .<span class="fn">createQuery</span>(<span class="str">"FROM Product"</span>, <span class="type">Product</span>.<span class="kw">class</span>)
+    .<span class="fn">setCacheable</span>(<span class="kw">true</span>)  <span class="cm">// ใช้ Query Cache</span>
+    .<span class="fn">getResultList</span>();</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 11: LIFECYCLE ============ -->
+<section class="sec" id="s11">
+    <div class="sec-hd"><div class="sec-ic pnk">🔄</div><h2 class="sec-t">Entity Lifecycle Callbacks</h2></div>
+    <p class="sec-d">ดัก Event เวลา Entity เปลี่ยนสถานะ</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@PrePersist / @PostPersist / @PreUpdate / @PostLoad</span><span class="card-s">Callback methods</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Article</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="type">Long</span> id;
+    <span class="kw">private</span> <span class="type">Date</span> createdAt;
+    <span class="kw">private</span> <span class="type">Date</span> updatedAt;
+
+    <span class="ann">@PrePersist</span>
+    <span class="kw">protected void</span> <span class="fn">onCreate</span>() {
+        createdAt = <span class="kw">new</span> <span class="type">Date</span>();
+        updatedAt = <span class="kw">new</span> <span class="type">Date</span>();
+    }
+
+    <span class="ann">@PreUpdate</span>
+    <span class="kw">protected void</span> <span class="fn">onUpdate</span>() {
+        updatedAt = <span class="kw">new</span> <span class="type">Date</span>();
+    }
+
+    <span class="ann">@PostPersist</span>
+    <span class="kw">public void</span> <span class="fn">afterInsert</span>() {
+        <span class="type">System</span>.out.<span class="fn">println</span>(<span class="str">"Inserted ID: "</span> + id);
+    }
+
+    <span class="ann">@PostLoad</span>
+    <span class="kw">public void</span> <span class="fn">afterLoad</span>() {
+        <span class="type">System</span>.out.<span class="fn">println</span>(<span class="str">"Loaded: "</span> + id);
+    }
+}</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 12: NAMED QUERIES ============ -->
+<section class="sec" id="s12">
+    <div class="sec-hd"><div class="sec-ic blu">📌</div><h2 class="sec-t">Named Queries</h2></div>
+    <p class="sec-d">ย้าย Query ไปเก็บบน Entity class — Hibernate จะ compile ไว้ตอน start</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">@NamedQuery / @NamedNativeQuery</span><span class="card-s">Predefined queries</span></div><div class="card-tags"><span class="tag tag-jpa">JPA</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="ann">@Entity</span>
+<span class="ann">@NamedQueries</span>({
+    <span class="ann">@NamedQuery</span>(name = <span class="str">"User.findByStatus"</span>,
+        query = <span class="str">"FROM User u WHERE u.status = :status"</span>),
+    <span class="ann">@NamedQuery</span>(name = <span class="str">"User.findAll"</span>,
+        query = <span class="str">"FROM User u ORDER BY u.id DESC"</span>)
+})
+<span class="kw">public class</span> <span class="type">User</span> { <span class="cm">/* ... */</span> }
+
+<span class="cm">// วิธีเรียกใช้</span>
+<span class="type">List</span>&lt;<span class="type">User</span>&gt; active = session
+    .<span class="fn">createNamedQuery</span>(<span class="str">"User.findByStatus"</span>, <span class="type">User</span>.<span class="kw">class</span>)
+    .<span class="fn">setParameter</span>(<span class="str">"status"</span>, <span class="str">"ACTIVE"</span>)
+    .<span class="fn">getResultList</span>();</code></pre>
+            </div>
+        </div></div>
+    </div>
+</section>
+
+<!-- ============ SECTION 13: BATCH ============ -->
+<section class="sec" id="s13">
+    <div class="sec-hd"><div class="sec-ic org">📊</div><h2 class="sec-t">Batch Processing</h2></div>
+    <p class="sec-d">ลูป persist ทีละแสน record ต้อง flush + clear เป็นระยะ ไม่งั้น Out Of Memory</p>
+
+    <div class="card">
+        <div class="card-hd"><div class="card-ta"><span class="card-n">Batch Insert / Update</span><span class="card-s">JDBC batch + flush clearing</span></div><div class="card-tags"><span class="tag tag-imp">Best Practice</span></div><span class="card-tg">▼</span></div>
+        <div class="card-bd"><div class="card-ct">
+            <h4>ตั้งค่า:</h4>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">XML</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.jdbc.batch_size"</span><span class="xml-tag">&gt;</span>50<span class="xml-tag">&lt;/property&gt;</span>
+<span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.order_inserts"</span><span class="xml-tag">&gt;</span>true<span class="xml-tag">&lt;/property&gt;</span>
+<span class="xml-tag">&lt;property</span> <span class="xml-attr">name=</span><span class="xml-val">"hibernate.order_updates"</span><span class="xml-tag">&gt;</span>true<span class="xml-tag">&lt;/property&gt;</span></code></pre>
+            </div>
+            <h4>โค้ด Java:</h4>
+            <div class="cb"><div class="cb-hd"><span class="cb-lang">Java</span><button class="cb-cp">📋 Copy</button></div>
+<pre><code><span class="type">Session</span> session = <span class="type">HibernateUtil</span>.<span class="fn">getSessionFactory</span>().<span class="fn">openSession</span>();
+<span class="type">Transaction</span> tx = session.<span class="fn">beginTransaction</span>();
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">100000</span>; i++) {
+    <span class="type">Employee</span> emp = <span class="kw">new</span> <span class="type">Employee</span>(<span class="str">"Employee "</span> + i);
+    session.<span class="fn">persist</span>(emp);
+
+    <span class="cm">// ทุกๆ 50 records → flush &amp; clear</span>
+    <span class="kw">if</span> (i > <span class="num">0</span> &amp;&amp; i % <span class="num">50</span> == <span class="num">0</span>) {
+        session.<span class="fn">flush</span>();
+        session.<span class="fn">clear</span>();
+    }
+}
+
+tx.<span class="fn">commit</span>();
+session.<span class="fn">close</span>();</code></pre>
+            </div>
+            <div class="ib tip"><span class="ib-i">💡</span><div>batch_size ที่เหมาะสมคือ 25-50 ขึ้นอยู่กับขนาดข้อมูลแต่ละ row</div></div>
+        </div></div>
+    </div>
+</section>
+
+</div><!-- /content -->
+
+<footer>
+    Made with ☕ for Java Developers &bull; Hibernate ORM 5.6 &bull;
+    <a href="https://hibernate.org/orm/documentation/" target="_blank">Official Hibernate Documentation ↗</a>
+</footer>
+
+</main>
+</div><!-- /wrap -->
+
+<!-- Back to Top -->
+<button class="btt" id="btt" aria-label="Back to top">↑</button>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+    // Card toggle
+    document.querySelectorAll('.card-hd').forEach(h=>{
+        h.addEventListener('click',()=>h.closest('.card').classList.toggle('open'));
+    });
+
+    // Copy
+    document.querySelectorAll('.cb-cp').forEach(b=>{
+        b.addEventListener('click',e=>{
+            e.stopPropagation();
+            const code=b.closest('.cb').querySelector('code');
+            const text=code.textContent;
+            navigator.clipboard.writeText(text).then(()=>{
+                b.classList.add('copied');b.innerHTML='✓ Copied!';
+                setTimeout(()=>{b.classList.remove('copied');b.innerHTML='📋 Copy';},2000);
+            }).catch(()=>{
+                const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+                b.classList.add('copied');b.innerHTML='✓ Copied!';
+                setTimeout(()=>{b.classList.remove('copied');b.innerHTML='📋 Copy';},2000);
+            });
+        });
+    });
+
+    // Search
+    const si=document.getElementById('search');
+    if(si)si.addEventListener('input',e=>{
+        const q=e.target.value.toLowerCase().trim();
+        const cards=document.querySelectorAll('.card');
+        const secs=document.querySelectorAll('.sec');
+        const navs=document.querySelectorAll('.nav-a[data-s]');
+        if(!q){cards.forEach(c=>c.style.display='');secs.forEach(s=>s.style.display='');navs.forEach(n=>n.style.display='');return;}
+        secs.forEach(s=>{
+            const sc=s.querySelectorAll('.card');let vis=false;
+            sc.forEach(c=>{
+                const t=(c.querySelector('.card-n')?.textContent||'').toLowerCase()+(c.querySelector('.card-s')?.textContent||'').toLowerCase()+(c.querySelector('.card-ct')?.textContent||'').toLowerCase();
+                if(t.includes(q)){c.style.display='';vis=true;}else c.style.display='none';
+            });
+            const st=(s.querySelector('.sec-t')?.textContent||'').toLowerCase();
+            if(vis||st.includes(q)){s.style.display='';if(st.includes(q))sc.forEach(c=>c.style.display='');}else s.style.display='none';
+        });
+        navs.forEach(n=>{const sec=document.getElementById(n.getAttribute('data-s'));if(sec)n.style.display=sec.style.display==='none'?'none':'';});
+    });
+
+    // Scroll spy
+    const secs=document.querySelectorAll('.sec[id]');
+    const navs=document.querySelectorAll('.nav-a[data-s]');
+    const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const id=e.target.id;navs.forEach(n=>n.classList.toggle('active',n.getAttribute('data-s')===id));}});},{rootMargin:'-10% 0px -80% 0px',threshold:0});
+    secs.forEach(s=>obs.observe(s));
+
+    // Back to top
+    const btt=document.getElementById('btt');
+    if(btt){window.addEventListener('scroll',()=>btt.classList.toggle('vis',scrollY>400));btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));}
+
+    // Mobile menu
+    const ham=document.getElementById('ham'),side=document.getElementById('side'),ov=document.getElementById('overlay');
+    if(ham&&side){
+        ham.addEventListener('click',()=>{side.classList.toggle('open');if(ov)ov.classList.toggle('on');});
+        if(ov)ov.addEventListener('click',()=>{side.classList.remove('open');ov.classList.remove('on');});
+        document.querySelectorAll('.nav-a').forEach(a=>a.addEventListener('click',()=>{if(innerWidth<=1024){side.classList.remove('open');if(ov)ov.classList.remove('on');}}));
+    }
+
+    // Smooth scroll
+    document.querySelectorAll('.nav-a[data-s]').forEach(a=>{
+        a.addEventListener('click',e=>{
+            e.preventDefault();
+            const t=document.getElementById(a.getAttribute('data-s'));
+            if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+        });
+    });
+});
+</script>
+</body>
+</html>
