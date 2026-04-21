@@ -1,5 +1,7 @@
 # 🐻 Hibernate ORM — Complete Command Reference
 
+https://khone3.github.io/Hibernate/
+
 คู่มือสรุปคำสั่ง Hibernate ORM ทั้งหมดที่ใช้บ่อย พร้อมตัวอย่างโค้ด Java สามารถใช้เป็น Cheatsheet ในการทำงานได้
 
 ---
